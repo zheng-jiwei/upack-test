@@ -1,0 +1,144 @@
+<html>
+<head><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<script type="text/javascript" src="https://libs.cmsod.jp/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<title>delivery cost</title>
+</head>
+<body style="height: auto; min-height: auto;">
+	<div style="text-align:center; width: 100%;">
+		<form method="post" action="/calculate">
+			<table style="margin-left:auto;margin-right:auto; margin-top:60px">
+				<tr>
+					<td width="50%" class="valign-top">
+						<a href="javascript:login()" id="login">ログイン</a><a href="javascript:logout()" id="logout" style="display:none">ログアウト</a>
+						<div style="text-align:left">
+								<span>配送方法：</span>
+								<select type="text" id="post_type">
+									<option value="宅配便">宅配便</option>
+									<!--option value="メール便">メール便</option-->
+								</select>
+							</div>
+							<div style="text-align:left">
+								<span>発送元：</span>
+								<select type="text" id="from">
+								</select>
+							</div>
+							<div style="text-align:left">
+									<span>発送先：</span>
+									<select type="text" id="to">
+									</select>
+							</div>
+							<div style="text-align:left">
+								<span>商品のサイズ：</span>
+								<select type="text" id="size">
+								</select>
+							</div>
+					</div>
+					  <div id="delivery_price" style="margin-left:auto;margin-right:auto; margin-top:60px; text-align:left">
+
+						</div>
+						<div style="margin-left:auto;margin-right:auto; margin-top:20px; text-align:right">
+							<input type="button" value="計算" onclick="submitPost()"/>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	<script>
+function http_send(path, method, data, callback){
+	$.ajax({
+		type: method,
+		timeout: 5000,
+		url: "http://localhost:8080"+ path,
+		data: data,
+		dataType: 'json',
+		cache: false,
+	}).done(function(result) {
+		if(result.data.error){
+			alert(result.data.error);
+		}else{
+			callback(result.data)
+		}
+	}).fail(function(error) {
+		console.log(error);
+	})
+}
+
+	function get_provinces(){
+		http_send("/provinces", "get", null, function(data){
+			let array_provinces = [];
+			data.forEach((item) => {
+				array_provinces.push("<option value=\"" + item + "\">" + item + "</option>");
+			});
+			document.getElementById("from").innerHTML = array_provinces.join("\n");
+			document.getElementById("to").innerHTML = array_provinces.join("\n");
+		});
+	}
+
+function get_box_size(){
+	http_send("/box/sizes", "get", null, function(data){
+		let array_sizes = [];
+		data.forEach((item) => {
+			array_sizes.push("<option value=\"" + item + "\">" + item + "cm</option>");
+		});
+		document.getElementById("size").innerHTML = array_sizes.join("\n");
+	});
+}
+
+	function get_value_from_cookie(key) {
+	  let cookies = document.cookie.split(";");
+	  let result = "";
+	  cookies.forEach(item => {
+	    item = item.trim();
+	    let currentCookie = item.split("=");
+	    if (currentCookie[0] == key) {
+	      result = currentCookie[1];
+	    }
+	  });
+	  return decodeURIComponent(result);
+	}
+
+	function login(){
+		var now = new Date();
+		var time = now.getTime();
+		var expireTime = time + 30*24*1000*3600;
+		now.setTime(expireTime);
+		document.cookie= "member=ok; Path=/; Expires=" + now.toGMTString();
+		document.location.reload();
+	}
+	function logout(){
+		document.cookie = "member=; path=/; expires=0; max-age=-1";
+		document.location.reload();
+	}
+
+	function submitPost() {
+		let data = {};
+		data.post_type = encodeURIComponent(document.getElementById("post_type").value);
+		data.from = encodeURIComponent(document.getElementById("from").value);
+		data.to = encodeURIComponent(document.getElementById("to").value);
+		data.size = encodeURIComponent(document.getElementById("size").value);
+		http_send("/calculate", "post", data, function(data){
+			let str_price = Number(data).toLocaleString('ja-JP', { style: 'currency', currency: "JPY", minimumFractionDigits: 0, maxmumFractionDigits: 0});
+			if(get_value_from_cookie("member") == ""){
+				document.getElementById("delivery_price").innerHTML="非会員送料：" + str_price;
+			}else{
+				document.getElementById("delivery_price").innerHTML="会員送料：" + str_price;
+			}
+		});
+	}
+
+
+get_provinces("province");
+get_box_size();
+
+	if(get_value_from_cookie("member") == ""){
+		document.getElementById("login").style.display = "block";
+		document.getElementById("logout").style.display = "none";
+	}else{
+		document.getElementById("login").style.display = "none";
+		document.getElementById("logout").style.display = "block";
+	}
+	</script>
+</body>
+</html>
