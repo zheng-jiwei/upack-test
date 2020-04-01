@@ -10,7 +10,8 @@
 			<table style="margin-left:auto;margin-right:auto; margin-top:60px">
 				<tr>
 					<td width="50%" class="valign-top">
-						<a href="javascript:login()" id="login">ログイン</a><a href="javascript:logout()" id="logout" style="display:none">ログアウト</a>
+						<div style="text-align:left;font-size:24;margin-bottom:20px">ゆうパック料金計算</div>
+						<!--<a href="javascript:login()" id="login">ログイン</a><a href="javascript:logout()" id="logout" style="display:none">ログアウト</a>-->
 						<div style="text-align:left">
 								<span>配送方法：</span>
 								<select type="text" id="post_type">
@@ -120,11 +121,7 @@ function get_box_size(){
 		data.size = encodeURIComponent(document.getElementById("size").value);
 		http_send("/calculate", "post", data, function(data){
 			let str_price = Number(data).toLocaleString('ja-JP', { style: 'currency', currency: "JPY", minimumFractionDigits: 0, maxmumFractionDigits: 0});
-			if(get_value_from_cookie("member") == ""){
-				document.getElementById("delivery_price").innerHTML="非会員送料：" + str_price;
-			}else{
-				document.getElementById("delivery_price").innerHTML="会員送料：" + str_price;
-			}
+			document.getElementById("delivery_price").innerHTML= str_price;
 		});
 	}
 
