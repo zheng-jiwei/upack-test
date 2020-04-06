@@ -342,8 +342,8 @@
                            (testing " When 180cm以上の荷物を東京から熊本まで発送する; Then エラーメッセージは'荷物のサイズは170cmまで受付できます。'\n"
                                     (is (= "荷物のサイズは170cmまで受付できます。" (:error (ucp/calculate_delivery_price "東京" "熊本" 180))))
                                     )
-                           (testing " When サイズにcmが付いたら; Then エラーメッセージは'荷物のサイズは170cmまで受付できます。'\n"
-                                    (is (= "サイズの入力は数字のみ、または数字のみあるの文字列ができます。" (:error (ucp/calculate_delivery_price "東京" "熊本" "180cm"))))
+                           (testing " When サイズにcmが付いたら; Then エラーメッセージは'サイズの入力は数字のみ、または数字のみあるの文字列ができます。'\n"
+                                    (is (= "サイズの入力は数字のみ、または数字のみあるの文字列ができます。" (:error (ucp/calculate_delivery_price "東京" "熊本" "120cm"))))
                                     )
                            )
                   )
@@ -354,7 +354,7 @@
                   (binding [ucp/area_map (atom (json/read-str (slurp "index.json")))
                             ucp/area_map_2 (atom (json/read-str (slurp "table.json")))]
                            (testing " When '60cm'のサイズを入力されて、東京から熊本まで発送する; Then 運賃は1300円'\n"
-                                    (is (= 1300 (ucp/calculate_delivery_price "東京" "熊本" 60)))
+                                    (is (= 1300 (ucp/calculate_delivery_price "東京" "熊本" "60")))
                                     )
                            )
                   )

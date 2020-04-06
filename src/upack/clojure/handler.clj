@@ -26,6 +26,7 @@
   (GET "/box/sizes" request (ucp/get-all-box-sizes request))
   (GET "/*" request (response/response (io/file (str "resources" (:uri request)))))
   (POST "/calculate" request (ucp/process-delivery-price request))
+  (POST "/best/price" request (ucp/process-best-price request))
   (route/not-found "Not Found :(")
  )
 
