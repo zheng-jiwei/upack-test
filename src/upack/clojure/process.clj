@@ -191,7 +191,8 @@
       (reset! added_height 0)
       (let [first_packet (select_max_plane_packet limit_box)
             left_packets_count (count @input_boxs)]
-           (if (not= 0 (:l first_packet))
+           (if (and (not= 0 (:l first_packet))
+                    (<= (+ (:l limit_box) (:w limit_box) (:h limit_box) (:h first_packet)) 170))
              (do
                (if (= 0 (:l limit_box))
                  (reset! exist_box first_packet)
@@ -217,7 +218,7 @@
              (if (not-empty @input_boxs)
                ;特別長さの荷物がある
                (let [max_length_packet (select_max_length_packet {:l 0})]
-                    (if (> (+ (:w @exist_box) (:h @exist_box) (:l max_length_packet)) 170 )
+                    (if (> (+ (:w @exist_box) (:h @exist_box) (:h max_length_packet) (:l max_length_packet)) 170 )
                       (do
                         (reset! result_boxs (conj @result_boxs @exist_box))
                         (combine_packets_in_layer {:l 0 :w 0 :h 0})
@@ -251,9 +252,9 @@
       (combine_packets_in_layer {:l 0 :w 0 :h 0})
       (prn "### result=" @result_boxs "### input=" size_array)
       (apply + (map (fn [box]
-                        (let [size (apply + (vals box))]
-                             (prn "### size=" from to size)
-                             (calculate_delivery_price from to size)
+                        (let [size (apply + (vals box))
+                              result (calculate_delivery_price from to size)]
+                          result
                              )
                         ) @result_boxs))
       )
